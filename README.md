@@ -51,64 +51,87 @@ The diagram below shows the flow of authentication, requests, and data between t
 
 ---
 
-## 💻 Local Setup & Development
+## 💻 Local Setup & Development (Automated)
+
+We have created an automated PowerShell script to make local development and multi-device testing extremely simple.
 
 ### 1. Prerequisites
 Ensure you have **Node.js (v18+)** installed.
 
-### 2. Spotify Developer Credentials
-1. Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard).
-2. Create an App and configure the Redirect URI as `http://localhost:3001/api/auth/callback`.
-3. Note your **Client ID** and **Client Secret**.
+### 2. Run the Dev/Preview Server
+1. Open a PowerShell terminal in the project root directory.
+2. Run the startup script:
+   ```powershell
+   .\start-wavemood.ps1
+   ```
+3. Choose one of the connection modes:
+   * **[Option 1] Local Wi-Fi mode (Recommended for Home Testing)**: Starts servers locally and outputs your laptop's Wi-Fi IP address. You can load and use the app on any phone, tablet, or device connected to your home Wi-Fi network instantly with 100% uptime.
+   * **[Option 2] Persistent Serveo Tunnel**: Asks you for a custom subdomain (e.g. `wavemood-kaveer`) and starts the tunnel in an auto-reconnecting loop, keeping the public URL permanent and recovering immediately if dropped.
+   * **[Option 3] Cloudflare Quick Tunnel**: Automatically downloads the secure `cloudflared` client and launches a Cloudflare Tunnel with unlimited capacity, no rate limits, and no warning landing pages.
 
-### 3. Backend Setup
-1. Navigate to the backend directory:
-   ```bash
-   cd spotify-mood-app/backend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Create a `.env` file based on `.env.example`:
-   ```env
-   PORT=3001
-   CLIENT_ID=your_spotify_client_id
-   CLIENT_SECRET=your_spotify_client_secret
-   REDIRECT_URI=http://localhost:3001/api/auth/callback
-   SESSION_SECRET=a_secure_session_secret_key
-   FRONTEND_URL=http://localhost:5173
-   ```
-4. Start the server:
-   ```bash
-   npm run dev
-   ```
+*Follow the terminal outputs for how to update your Spotify Developer Dashboard settings and backend `.env` file based on the option you choose.*
 
-### 4. Frontend Setup (Phase 7)
-1. Navigate to the phase-7 directory:
-   ```bash
-   cd phase-7
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Run the development server:
-   ```bash
-   npm run dev
-   ```
-4. Build the optimized production bundle:
-   ```bash
-   npm run build
-   ```
-5. Run the production preview server:
-   ```bash
-   npm run preview -- --host 0.0.0.0 --port 5173
-   ```
+---
 
-### 5. Exposing to Local Network/Mobile
-To test the production build on your mobile device, expose the local preview port using a Serveo secure HTTPS tunnel:
-```bash
-ssh -o StrictHostKeyChecking=no -R 80:127.0.0.1:5173 serveo.net
-```
-Use the generated HTTPS URL on any mobile device on your network!
+## ☁️ Permanent Production Cloud Deployment [RECOMMENDED]
+
+To make your application **permanently workable** and accessible 24/7 on any device in the world without requiring your laptop to remain open or running local tunnels, you can deploy it to the cloud for free using Render (backend) and Vercel (frontend).
+
+### Phase A: Deploy the Backend on Render
+1. Sign up for a free account at [Render](https://render.com).
+2. Click **New** -> **Web Service** and connect your GitHub repository (`Spotify-Wavemood`).
+3. Set the following details:
+   * **Name**: `wavemood-backend`
+   * **Root Directory**: `spotify-mood-app/backend`
+   * **Build Command**: `npm install`
+   * **Start Command**: `node src/server.js`
+4. Add the following **Environment Variables**:
+   * `SPOTIFY_CLIENT_ID`: *Your Spotify Client ID*
+   * `SPOTIFY_CLIENT_SECRET`: *Your Spotify Client Secret*
+   * `SPOTIFY_REDIRECT_URI`: `https://wavemood-backend.onrender.com/api/auth/callback` (replace with your actual Render service URL once generated)
+   * `SESSION_SECRET`: *Any long random password string*
+   * `PORT`: `3001`
+   * `FRONTEND_URL`: `https://wavemood.vercel.app` (replace with your actual Vercel URL once generated)
+5. Click **Deploy Web Service**. Once deployed, copy your Render Web Service URL (e.g., `https://wavemood-backend.onrender.com`).
+
+### Phase B: Configure and Deploy Frontend on Vercel
+1. In your local workspace, open `phase-7/vercel.json`.
+2. Update the destination URL to point to your deployed Render URL:
+   ```json
+   {
+     "cleanUrls": true,
+     "rewrites": [
+       {
+         "source": "/api/:path*",
+         "destination": "https://wavemood-backend.onrender.com/api/:path*"
+       },
+       {
+         "source": "/(.*)",
+         "destination": "/index.html"
+       }
+     ]
+   }
+   ```
+3. Commit and push this change to your GitHub repository:
+   ```bash
+   git add phase-7/vercel.json
+   git commit -m "Configure Vercel API rewrites for production"
+   git push origin main
+   ```
+4. Sign up for a free account at [Vercel](https://vercel.com).
+5. Click **Add New** -> **Project** and import your GitHub repository.
+6. Configure the following settings:
+   * **Root Directory**: `phase-7`
+   * **Framework Preset**: `Vite` (automatically detected)
+   * **Build Command**: `npm run build`
+   * **Output Directory**: `dist`
+7. Click **Deploy**. Vercel will build and host your frontend.
+
+### Phase C: Add Callback to Spotify Dashboard
+1. Go to your [Spotify Developer Dashboard](https://developer.spotify.com/dashboard) and open your app settings.
+2. In the **Redirect URIs** field, add your Render backend callback:
+   * `https://wavemood-backend.onrender.com/api/auth/callback` (replace with your actual Render URL)
+3. Save the settings.
+
+Now your site is fully online, permanently live, and works flawlessly on any device!
+
