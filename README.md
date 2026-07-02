@@ -14,9 +14,42 @@ Access the live application from **any device (phone, tablet, laptop)** in the w
 
 ## 🔌 System Integration & Architecture
 
-The diagram below shows the flow of authentication, requests, and data between the frontend, backend, and the external Spotify API:
+The diagram below shows the flow of authentication, requests, and data between the Vercel frontend, Render backend, and the external Spotify API:
 
-![Spotify WaveMood Architecture](wavemood_architecture.png)
+```mermaid
+flowchart TB
+    subgraph Client["Frontend (Vercel - spotify-wavemood.vercel.app)"]
+        Home[Home Page]
+        Mood[Mood Recommendation Page]
+        AuthHook[useSpotifyAuth]
+        MoodStore[Zustand Stores]
+        PreviewPlayer[HTML5 Audio Preview]
+    end
+
+    subgraph Server["Backend (Render - wavemood-backend.onrender.com)"]
+        OAuth[Auth Routes]
+        RecAPI[Recommendations API]
+        QueueAPI[Queue / Playlist API]
+        Session[express-session in-memory]
+        SpotifySDK[spotify-web-api-node]
+        MoodParser[MOOD_MAP + Keyword Matcher]
+    end
+
+    subgraph External["External Services (Free)"]
+        Spotify[Spotify Web API]
+    end
+
+    Home -->|Link /mood| Mood
+    Mood -->|POST /api/recommendations| RecAPI
+    Mood -->|POST /api/queue/add| QueueAPI
+    Mood --> PreviewPlayer
+    AuthHook -->|GET /api/auth/*| OAuth
+    OAuth --> Session
+    RecAPI --> MoodParser
+    RecAPI --> SpotifySDK
+    QueueAPI --> SpotifySDK
+    SpotifySDK --> Spotify
+```
 
 ---
 
