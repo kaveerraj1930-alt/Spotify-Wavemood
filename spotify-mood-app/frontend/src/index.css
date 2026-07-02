@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --spotify-black: #121212;
+    --spotify-dark: #181818;
+    --spotify-card: #282828;
+    --spotify-hover: #3E3E3E;
+    --spotify-green: #1DB954;
+  }
+
+  body {
+    @apply bg-[#121212] text-white font-sans antialiased;
+    margin: 0;
+    padding: 0;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
