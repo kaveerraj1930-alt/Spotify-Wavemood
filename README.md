@@ -8,9 +8,40 @@
 
 Access the live application from **any device (phone, tablet, laptop)** in the world:
 
-🔗 **[Spotify WaveMood Public Tunnel](https://4fd460fb6811d783-106-219-121-13.serveousercontent.com)**
+🔗 **[Spotify WaveMood Public Tunnel](https://913264640c53d549-106-219-121-13.serveousercontent.com)**
 
 *(Note: When launching the link for the first time, click the **Continue to Site** button to bypass the browser warning page and access the application dashboard.)*
+
+---
+
+## 🔌 System Integration & Architecture
+
+The diagram below shows the flow of authentication, requests, and data between the frontend, backend, and the external Spotify API:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User
+    participant Frontend as Frontend (React + Vite)
+    participant Backend as Backend (Express Server)
+    participant Spotify as Spotify API
+    
+    User->>Frontend: Selects Mood & Clicks Login/Auth
+    Frontend->>Backend: Request Auth URL (/api/auth/login)
+    Backend->>Spotify: Fetch Authorization Screen
+    Spotify-->>User: Present Login & Permission Screen
+    User->>Spotify: Authorize Application
+    Spotify->>Backend: Callback with Auth Code
+    Backend->>Spotify: Exchange Code for Access Token
+    Spotify-->>Backend: Return User Access & Refresh Tokens
+    Backend-->>Frontend: Set Session Cookies & Redirect to Dashboard (/mood)
+    
+    Frontend->>Backend: Request Mood Recommendations (/api/recommendations)
+    Backend->>Spotify: Query Spotify Web API (Top Tracks, Playback Metadata)
+    Spotify-->>Backend: Return Tracks matching mood params
+    Backend-->>Frontend: Return Hydrated Recommendation Playlist
+    Frontend-->>User: Display WaveMood Tracks, Recent History & Audio Previews
+```
 
 ---
 
