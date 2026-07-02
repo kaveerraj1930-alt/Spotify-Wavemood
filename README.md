@@ -8,7 +8,7 @@
 
 Access the live application from **any device (phone, tablet, laptop)** in the world:
 
-🔗 **[Spotify WaveMood Public Tunnel](https://913264640c53d549-106-219-121-13.serveousercontent.com)**
+🔗 **[Spotify WaveMood Public Tunnel](https://4492f5b5ad5613ae-106-219-121-13.serveousercontent.com)**
 
 *(Note: When launching the link for the first time, click the **Continue to Site** button to bypass the browser warning page and access the application dashboard.)*
 
